@@ -1,0 +1,35 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+	<description>Munis Staff Export for Unified Talent Import</description>
+	<properties>
+		<!--Loading from external properties file-->
+		<include href="etl.properties"/>
+	</properties>
+
+	<connection id="MunisProd" driver="$driver8" url="$url8" user="$user8" password="$password8" classpath="$classpath8"/>
+	<connection id="MunisStaffExport" driver="csv" url="$munis_emp_output">
+		null_string=
+		eol=\r\n
+	</connection>
+    <script connection-id="MunisStaffExport">
+		Street, City, Birthdate, Deactivated, EmployeeID, FirstName, Gender, GlobalID, LastName, MiddleName, PersonalEmail, BuildingID, State, Username, WorkEmail, Zip
+	</script>
+	<query connection-id="MunisProd">
+	  SELECT DISTINCT TRIM(ed_p_address1) as Street, TRIM(ed_p_address_city) as City,
+	    FORMAT(e_date_of_birth, 'yyyy-MM-dd') as BirthDate,
+		CASE e_activity_status
+		  WHEN 'I' THEN 'T'
+		  ELSE NULL
+		END as Deactivated,
+		a_employee_number as EmployeeID, a_name_first as FirstName, e_gender as Gender,
+		TRIM(e_email) as WorkEmail, a_name_last as LastName, e_middle_name as MiddleName,
+		TRIM(e_alt_email) as PersonalEmail, a_location_primary as BuildingID,
+		ed_p_address_state as State, ed_p_address_zip as Zip
+		FROM pr_employee_master
+        WHERE (a_bargain_primary = 'S000') AND (a_projection = 0) AND e_email !=''
+        ORDER BY a_employee_number ASC;
+	    <script connection-id="MunisStaffExport">
+			$Street, $City, $BirthDate, $Deactivated, $EmployeeID, $FirstName, $Gender, $WorkEmail, $LastName, $MiddleName, $PersonalEmail, $BuildingID, $State, $WorkEmail, $WorkEmail, $Zip
+		</script>
+	</query>
+</etl>

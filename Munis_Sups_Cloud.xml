@@ -1,0 +1,25 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+	<description>Munis Supervisors Export for Unified Talent Import</description>
+	<properties>
+		<!--Loading from external properties file-->
+		<include href="etl.properties"/>
+	</properties>
+	<connection id="MunisProd" driver="$driver8" url="$url8" user="$user8" password="$password8" classpath="$classpath8"/>
+	<connection id="MunisSupsExport" driver="csv" url="$munis_sups_output">
+		null_string=
+		eol=\r\n
+	</connection>
+
+    <script connection-id="MunisSupsExport">
+		Employee Number, Supervisor
+	</script>
+	<query connection-id="MunisProd">
+	  SELECT a_employee_number as EmployeeNumber, e_supervisor as Supervisor
+	  FROM pr_employee_master
+	  where (a_bargain_primary = 'S000') AND (a_projection = 0) AND (e_activity_status = 'A') and (e_supervisor != 0);
+	    <script connection-id="MunisSupsExport">
+			$EmployeeNumber, $Supervisor
+		</script>
+	</query>
+</etl>
